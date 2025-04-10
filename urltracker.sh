@@ -55,12 +55,18 @@ show_help() {
     echo "  -v, --verbose        Verbose mode: show all redirect URLs"
     echo "  -q, --quiet          Quiet mode: no output to console"
     echo "  -nc, --no-color      Disable colored output"
+    echo "  -a, --auth <user:password>   Use HTTP Basic Authentication"
+    echo "  -H, --header <header>        Add custom header (can be used multiple times)"
+    echo "  -c, --cookie <name=value>    Add a cookie (can be used multiple times)"
     echo ""
     echo "Examples:"
     echo "  $0 https://example.com"
     echo "  $0 --list urls.txt"
     echo "  $0 --list urls.txt --output results.csv"
     echo "  $0 --verbose https://example.com"
+    echo "  $0 --auth username:password https://example.com"
+    echo "  $0 --header \"User-Agent: Mozilla/5.0\" https://example.com"
+    echo "  $0 --cookie \"session=abc123\" https://example.com"
     echo "  $0 --quiet --list urls.txt --output results.csv"
     echo ""
     echo "The script displays information in the format:"
@@ -77,6 +83,35 @@ show_help() {
     exit 0
 }
 
+# Function to build curl command safely
+build_curl_command() {
+    local base_cmd="$1"
+    local url="$2"
+    
+    # Start with base curl options
+    local cmd="curl $base_cmd"
+    
+    # Add authentication if provided
+    if [ -n "$AUTH" ]; then
+        cmd="$cmd -u '$AUTH'"
+    fi
+    
+    # Add headers if provided
+    for header in "${HEADERS[@]}"; do
+        cmd="$cmd -H '$header'"
+    done
+    
+    # Add cookies if provided
+    for cookie in "${COOKIES[@]}"; do
+        cmd="$cmd -b '$cookie'"
+    done
+    
+    # Add URL (quoted to handle special characters)
+    cmd="$cmd '$url'"
+    
+    echo "$cmd"
+}
+
 # Function to process a single URL
 process_url() {
     local URL="$1"
@@ -84,8 +119,12 @@ process_url() {
     local VERBOSITY="$3"
     local USE_COLOR="$4"
     
-    # Make the request with curl and process the results
-    output=$(curl -sIL -w "%{url_effective}\n%{http_code}\n" -o /dev/null "$URL")
+    # Build base curl command
+    local BASE_CURL_OPTS="-sIL -w '%{url_effective}\n%{http_code}\n' -o /dev/null"
+    local CURL_CMD=$(build_curl_command "$BASE_CURL_OPTS" "$URL")
+    
+    # Execute command and capture output
+    output=$(eval "$CURL_CMD")
     effective_url=$(echo "$output" | head -1)
     final_status=$(echo "$output" | tail -1)
 
@@ -95,8 +134,9 @@ process_url() {
         temp_file=$(mktemp)
         
         # Use curl with -D to dump headers to file
-        # We'll also get the effective URL and final status code separately
-        curl -sIL "$URL" -o /dev/null -D "$temp_file"
+        local HEADER_CURL_OPTS="-sIL -o /dev/null -D $temp_file"
+        local HEADER_CURL_CMD=$(build_curl_command "$HEADER_CURL_OPTS" "$URL")
+        eval "$HEADER_CURL_CMD"
         
         # Process the headers more carefully to associate each status code with the right URL
         STATUS_CODES=()
@@ -125,14 +165,18 @@ process_url() {
         # For non-redirect responses, we might only have one status code
         if [ ${#STATUS_CODES[@]} -le $redirect_count ]; then
             # Make one more request to get the final status code
-            final_code=$(curl -sI -o /dev/null -w "%{http_code}" "$effective_url")
+            local STATUS_CURL_OPTS="-sI -o /dev/null -w '%{http_code}'"
+            local STATUS_CURL_CMD=$(build_curl_command "$STATUS_CURL_OPTS" "$effective_url")
+            final_code=$(eval "$STATUS_CURL_CMD")
             STATUS_CODES[$redirect_count]="$final_code"
         fi
         
         rm "$temp_file"
     else
         # For normal mode, we just need the status codes
-        status_output=$(curl -sIL "$URL" | grep -i "HTTP/" | awk '{print $2}')
+        local STATUS_CURL_OPTS="-sIL"
+        local STATUS_CURL_CMD=$(build_curl_command "$STATUS_CURL_OPTS" "$URL")
+        status_output=$(eval "$STATUS_CURL_CMD" | grep -i "HTTP/" | awk '{print $2}')
         
         # Convert status codes to array
         STATUS_CODES=()
@@ -224,8 +268,17 @@ fi
 LIST_FILE=""
 CSV_FILE=""
 SINGLE_URL=""
-VERBOSITY="normal" # Default verbosity
-USE_COLOR="true"   # Default to using colors
+VERBOSITY="normal"  # Default verbosity
+USE_COLOR="true"    # Default to using colors
+AUTH=""             # Authentication credentials
+HEADERS=()          # Array for custom headers
+COOKIES=()          # Array for cookies
+
+# Detect if we're on macOS
+IS_MACOS=false
+if [ "$(uname)" == "Darwin" ]; then
+    IS_MACOS=true
+fi
 
 # Process arguments
 while [ $# -gt 0 ]; do
@@ -263,7 +316,34 @@ while [ $# -gt 0 ]; do
             USE_COLOR="false"
             shift
             ;;
-        # Mantendo compatibilidade com a opção -list e -output antiga
+        -a|--auth)
+            if [ -z "$2" ]; then
+                echo "Error: Authentication credentials not specified."
+                echo "Use '$0 --help' for more information."
+                exit 1
+            fi
+            AUTH="$2"
+            shift 2
+            ;;
+        -H|--header)
+            if [ -z "$2" ]; then
+                echo "Error: Header not specified."
+                echo "Use '$0 --help' for more information."
+                exit 1
+            fi
+            HEADERS+=("$2")
+            shift 2
+            ;;
+        -c|--cookie)
+            if [ -z "$2" ]; then
+                echo "Error: Cookie not specified."
+                echo "Use '$0 --help' for more information."
+                exit 1
+            fi
+            COOKIES+=("$2")
+            shift 2
+            ;;
+        # Mantendo compatibilidade com as opções antigas
         -list)
             if [ -z "$2" ] || [ ! -f "$2" ]; then
                 echo "Error: List file not specified or not found."
