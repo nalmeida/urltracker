@@ -50,18 +50,18 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -h, --help           Display this help message"
-    echo "  -list <file>         Process a list of URLs from a text file"
-    echo "  -output <file>       Export results to a CSV file"
-    echo "  -v                   Verbose mode: show all redirect URLs"
-    echo "  -q                   Quiet mode: no output to console"
+    echo "  -l, --list <file>    Process a list of URLs from a text file"
+    echo "  -o, --output <file>  Export results to a CSV file"
+    echo "  -v, --verbose        Verbose mode: show all redirect URLs"
+    echo "  -q, --quiet          Quiet mode: no output to console"
     echo "  -nc, --no-color      Disable colored output"
     echo ""
     echo "Examples:"
     echo "  $0 https://example.com"
-    echo "  $0 -list urls.txt"
-    echo "  $0 -list urls.txt -output results.csv"
-    echo "  $0 -v https://example.com"
-    echo "  $0 -q -list urls.txt -output results.csv"
+    echo "  $0 --list urls.txt"
+    echo "  $0 --list urls.txt --output results.csv"
+    echo "  $0 --verbose https://example.com"
+    echo "  $0 --quiet --list urls.txt --output results.csv"
     echo ""
     echo "The script displays information in the format:"
     echo "  <ORIGINAL_URL> [STATUS_CODES_LIST] <FINAL_URL>"
@@ -233,6 +233,37 @@ while [ $# -gt 0 ]; do
         -h|--help)
             show_help
             ;;
+        -l|--list)
+            if [ -z "$2" ] || [ ! -f "$2" ]; then
+                echo "Error: List file not specified or not found."
+                echo "Use '$0 --help' for more information."
+                exit 1
+            fi
+            LIST_FILE="$2"
+            shift 2
+            ;;
+        -o|--output)
+            if [ -z "$2" ]; then
+                echo "Error: Output file not specified."
+                echo "Use '$0 --help' for more information."
+                exit 1
+            fi
+            CSV_FILE="$2"
+            shift 2
+            ;;
+        -v|--verbose)
+            VERBOSITY="verbose"
+            shift
+            ;;
+        -q|--quiet)
+            VERBOSITY="quiet"
+            shift
+            ;;
+        -nc|--no-color)
+            USE_COLOR="false"
+            shift
+            ;;
+        # Mantendo compatibilidade com a opção -list e -output antiga
         -list)
             if [ -z "$2" ] || [ ! -f "$2" ]; then
                 echo "Error: List file not specified or not found."
@@ -250,18 +281,6 @@ while [ $# -gt 0 ]; do
             fi
             CSV_FILE="$2"
             shift 2
-            ;;
-        -v)
-            VERBOSITY="verbose"
-            shift
-            ;;
-        -q)
-            VERBOSITY="quiet"
-            shift
-            ;;
-        -nc|--no-color)
-            USE_COLOR="false"
-            shift
             ;;
         *)
             SINGLE_URL="$1"
