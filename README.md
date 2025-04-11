@@ -6,7 +6,8 @@ A command-line tool to check HTTP status codes and track redirections for URLs.
 
 URL Tracker helps you analyze HTTP responses and redirects for single URLs or lists of URLs. Perfect for website maintenance, SEO auditing, and link checking.
 
-Features:
+### Features:
+
 - Single URL status checking
 - Batch URL processing from a file
 - Redirect chain tracking
@@ -23,20 +24,20 @@ Features:
 ## Installation
 
 1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/urltracker.git
-   cd urltracker
-   ```
+```bash
+git clone https://github.com/yourusername/urltracker.git
+cd urltracker
+```
 
 2. Make the script executable:
-   ```bash
-   chmod +x urltracker.sh
-   ```
+```bash
+chmod +x urltracker.sh
+```
 
 3. (Optional) Create a symlink to use it from anywhere:
-   ```bash
-   sudo ln -s $(pwd)/urltracker.sh /usr/local/bin/urltracker
-   ```
+```bash
+sudo ln -s $(pwd)/urltracker.sh /usr/local/bin/urltracker
+```
 
 ## Usage
 
