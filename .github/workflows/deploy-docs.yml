@@ -6,6 +6,7 @@ on:
     paths:
       - 'README.md'
       - '.github/workflows/deploy-docs.yml'
+      - 'docs/**'
 
 jobs:
   build-and-deploy:
@@ -22,49 +23,19 @@ jobs:
         with:
           node-version: '18'
       
-      - name: Install Docsify CLI
-        run: npm install -g docsify-cli
-      
-      - name: Setup Documentation Structure
+      - name: Copy README for 11ty
         run: |
-          mkdir -p docs
-          cp README.md docs/README.md
-          
-          # Create index.html
-          cat > docs/index.html << 'EOL'
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8">
-            <title>URLTracker Documentation</title>
-            <meta name="description" content="Documentation for URLTracker">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
-          </head>
-          <body>
-            <div id="app"></div>
-            <script>
-              window.$docsify = {
-                name: 'URLTracker',
-                repo: 'https://github.com/nalmeida/urltracker',
-                auto2top: true,
-                coverpage: false,
-                loadSidebar: false,
-                subMaxLevel: 2,
-              };
-            </script>
-            <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
-            <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
-            <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js"></script>
-          </body>
-          </html>
-          EOL
-          
-          # Create .nojekyll file to prevent Jekyll processing
-          touch docs/.nojekyll
+          # Copy README.md to the src directory for 11ty
+          cp README.md docs/src/
+      
+      - name: Install dependencies and build
+        run: |
+          cd docs
+          npm install
+          npx @11ty/eleventy
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: docs
+          folder: docs/dist
           branch: gh-pages
