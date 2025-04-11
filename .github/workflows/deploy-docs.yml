@@ -3,117 +3,65 @@ name: Deploy Documentation
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+    paths:
+      - 'README.md'
+      - '.github/workflows/deploy-docs.yml'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
-
-      - name: Install dependencies
-        run: npm install -g marked highlight.js
-
-      - name: Convert README to HTML
+          node-version: '18'
+      
+      - name: Install Docsify CLI
+        run: npm install -g docsify-cli
+      
+      - name: Setup Documentation Structure
         run: |
           mkdir -p docs
+          cp README.md docs/README.md
           
-          # Create a Node.js script to convert Markdown to HTML
-          cat > convert.js << 'EOF'
-          const fs = require('fs');
-          const marked = require('marked');
-          const hljs = require('highlight.js');
-          
-          // Configure marked with syntax highlighting
-          marked.setOptions({
-            highlight: function(code, lang) {
-              const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-              return hljs.highlight(code, { language }).value;
-            }
-          });
-          
-          // Read README content
-          const readmeContent = fs.readFileSync('README.md', 'utf-8');
-          
-          // Convert to HTML
-          const html = marked.parse(readmeContent);
-          
-          // Create full HTML page with GitHub-like styling
-          const fullHtml = `<!DOCTYPE html>
-          <html lang="en">
+          # Create index.html
+          cat > docs/index.html << 'EOL'
+          <!DOCTYPE html>
+          <html>
           <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>URL Tracker Documentation</title>
-              <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.1.0/github-markdown.min.css">
-              <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.3.1/styles/github.css">
-              <style>
-                  body {
-                      box-sizing: border-box;
-                      min-width: 200px;
-                      max-width: 980px;
-                      margin: 0 auto;
-                      padding: 45px;
-                  }
-                  @media (max-width: 767px) {
-                      body {
-                          padding: 15px;
-                      }
-                  }
-                  .header-link {
-                      opacity: 0;
-                      transition: opacity 0.2s;
-                      margin-left: 0.2em;
-                  }
-                  h1:hover .header-link,
-                  h2:hover .header-link,
-                  h3:hover .header-link,
-                  h4:hover .header-link,
-                  h5:hover .header-link,
-                  h6:hover .header-link {
-                      opacity: 1;
-                  }
-              </style>
+            <meta charset="UTF-8">
+            <title>URLTracker Documentation</title>
+            <meta name="description" content="Documentation for URLTracker">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
           </head>
-          <body class="markdown-body">
-              ${html}
-              <footer style="margin-top: 50px; border-top: 1px solid #eaecef; padding-top: 20px;">
-                  <p>Last updated: ${new Date().toISOString().split('T')[0]}</p>
-                  <p><a href="https://github.com/${process.env.GITHUB_REPOSITORY}">View on GitHub</a></p>
-              </footer>
-              <script>
-                  // Add anchor links to headings
-                  document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(heading => {
-                      const id = heading.getAttribute('id');
-                      if (id) {
-                          const link = document.createElement('a');
-                          link.className = 'header-link';
-                          link.href = '#' + id;
-                          link.innerHTML = '#';
-                          heading.appendChild(link);
-                      }
-                  });
-              </script>
+          <body>
+            <div id="app"></div>
+            <script>
+              window.$docsify = {
+                name: 'URLTracker',
+                repo: 'https://github.com/nalmeida/urltracker',
+                auto2top: true,
+                coverpage: false,
+                loadSidebar: false,
+                subMaxLevel: 2,
+              };
+            </script>
+            <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+            <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+            <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-javascript.min.js"></script>
           </body>
-          </html>`;
+          </html>
+          EOL
           
-          // Write to file
-          fs.writeFileSync('docs/index.html', fullHtml);
-          EOF
-          
-          # Execute the conversion script
-          node convert.js
-          
-          # Copy any image directories
-          cp -r images* docs/ 2>/dev/null || true
-          cp -r img* docs/ 2>/dev/null || true
-          cp -r assets* docs/ 2>/dev/null || true
+          # Create .nojekyll file to prevent Jekyll processing
+          touch docs/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
