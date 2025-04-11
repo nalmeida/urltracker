@@ -1,0 +1,14 @@
+{
+  "name": "urltracker-docs",
+  "version": "1.0.0",
+  "description": "Documentation for URLTracker",
+  "main": ".eleventy.js",
+  "scripts": {
+    "build": "eleventy",
+    "serve": "eleventy --serve"
+  },
+  "dependencies": {
+    "@11ty/eleventy": "^3.0.0",
+    "markdown-it": "^13.0.1"
+  }
+}
