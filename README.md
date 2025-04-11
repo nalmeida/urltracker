@@ -52,7 +52,6 @@ Create a text file with one URL per line:
 ```
 https://httpbin.org/status/200
 https://httpbin.org/redirect/2
-https://stackoverflow.com
 https://httpbin.org/status/404
 ```
 
@@ -109,28 +108,28 @@ Options:
 This project uses BATS (Bash Automated Testing System) for testing. To run the tests:
 
 1. Install BATS if you don't have it:
-   ```bash
-   # MacOS
-   brew install bats-core
-   
-   # Debian/Ubuntu
-   sudo apt-get install bats
-   ```
+```bash
+# MacOS
+brew install bats-core
+
+# Debian/Ubuntu
+sudo apt-get install bats
+```
 
 2. Run the tests:
-   ```bash
-   bats test_urltracker.bats
-   ```
+```bash
+bats test_urltracker.bats
+```
 
 3. For verbose test output:
-   ```bash
-   bats --tap test_urltracker.bats
-   ```
+```bash
+bats --tap test_urltracker.bats
+```
 
 4. For debug test output:
-   ```bash
-   bats --print-output-on-failure --show-output-of-passing-tests test_urltracker.bats
-   ```
+```bash
+bats --print-output-on-failure --show-output-of-passing-tests test_urltracker.bats
+```
 
 ### Test Coverage
 
@@ -158,5 +157,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- The BATS project for the testing framework
-- Contributors who have helped improve this tool
+- The [BATS project](https://github.com/bats-core/bats-core) for the testing framework
+- The command `curl -IL https://httpbin.org/redirect/2` that led me to create this project
+- The amazing [httpx](https://github.com/projectdiscovery/httpx) as inspiration and a powerful alternative to this humble project
