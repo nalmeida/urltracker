@@ -1,6 +1,10 @@
 # URL Tracker
 
-A command-line tool to check HTTP status codes and track redirections for URLs.
+![urltracker demo](docs/demo/demo.gif)
+
+> A command-line tool to check HTTP status codes and track redirections for URLs.
+
+Github repo: [https://github.com/nalmeida/urltracker](https://github.com/nalmeida/urltracker)
 
 ## Overview
 
@@ -25,7 +29,7 @@ URL Tracker helps you analyze HTTP responses and redirects for single URLs or li
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/urltracker.git
+git clone https://github.com/nalmeida/urltracker.git
 cd urltracker
 ```
 
