@@ -165,3 +165,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - The [BATS project](https://github.com/bats-core/bats-core) for the testing framework
 - The command `curl -IL https://httpbin.org/redirect/2` that led me to create this project
 - The amazing [httpx](https://github.com/projectdiscovery/httpx) as inspiration and a powerful alternative to this humble project
+- The amazing [vhs](https://github.com/charmbracelet/vhs) CLI demo generator
