@@ -1,8 +1,12 @@
 <h1>URL Tracker</h1>
+<p><img src="docs/demo/demo.gif" alt="urltracker demo"></p>
+<blockquote>
 <p>A command-line tool to check HTTP status codes and track redirections for URLs.</p>
+</blockquote>
+<p>Github repo: <a href="https://github.com/nalmeida/urltracker">https://github.com/nalmeida/urltracker</a></p>
 <h2>Overview</h2>
 <p>URL Tracker helps you analyze HTTP responses and redirects for single URLs or lists of URLs. Perfect for website maintenance, SEO auditing, and link checking.</p>
-<p>Features:</p>
+<h3>Features:</h3>
 <ul>
 <li>Single URL status checking</li>
 <li>Batch URL processing from a file</li>
@@ -19,23 +23,21 @@
 </ul>
 <h2>Installation</h2>
 <ol>
-<li>
-<p>Clone this repository:</p>
-<pre><code class="language-bash">git clone https://github.com/yourusername/urltracker.git
+<li>Clone this repository:</li>
+</ol>
+<pre><code class="language-bash">git clone https://github.com/nalmeida/urltracker.git
 cd urltracker
 </code></pre>
-</li>
-<li>
-<p>Make the script executable:</p>
+<ol start="2">
+<li>Make the script executable:</li>
+</ol>
 <pre><code class="language-bash">chmod +x urltracker.sh
 </code></pre>
-</li>
-<li>
-<p>(Optional) Create a symlink to use it from anywhere:</p>
+<ol start="3">
+<li>(Optional) Create a symlink to use it from anywhere:</li>
+</ol>
 <pre><code class="language-bash">sudo ln -s $(pwd)/urltracker.sh /usr/local/bin/urltracker
 </code></pre>
-</li>
-</ol>
 <h2>Usage</h2>
 <h3>Basic URL Check</h3>
 <pre><code class="language-bash">./urltracker.sh https://httpbin.org/status/200
@@ -44,7 +46,6 @@ cd urltracker
 <p>Create a text file with one URL per line:</p>
 <pre><code>https://httpbin.org/status/200
 https://httpbin.org/redirect/2
-https://stackoverflow.com
 https://httpbin.org/status/404
 </code></pre>
 <p>Then run:</p>
@@ -80,31 +81,29 @@ Options:
 <h3>Running Tests</h3>
 <p>This project uses BATS (Bash Automated Testing System) for testing. To run the tests:</p>
 <ol>
-<li>
-<p>Install BATS if you don't have it:</p>
+<li>Install BATS if you don't have it:</li>
+</ol>
 <pre><code class="language-bash"># MacOS
 brew install bats-core
 
 # Debian/Ubuntu
 sudo apt-get install bats
 </code></pre>
-</li>
-<li>
-<p>Run the tests:</p>
+<ol start="2">
+<li>Run the tests:</li>
+</ol>
 <pre><code class="language-bash">bats test_urltracker.bats
 </code></pre>
-</li>
-<li>
-<p>For verbose test output:</p>
+<ol start="3">
+<li>For verbose test output:</li>
+</ol>
 <pre><code class="language-bash">bats --tap test_urltracker.bats
 </code></pre>
-</li>
-<li>
-<p>For debug test output:</p>
+<ol start="4">
+<li>For debug test output:</li>
+</ol>
 <pre><code class="language-bash">bats --print-output-on-failure --show-output-of-passing-tests test_urltracker.bats
 </code></pre>
-</li>
-</ol>
 <h3>Test Coverage</h3>
 <p>The test suite covers:</p>
 <ul>
@@ -129,6 +128,7 @@ sudo apt-get install bats
 <p>This project is licensed under the MIT License - see the LICENSE file for details.</p>
 <h2>Acknowledgments</h2>
 <ul>
-<li>The BATS project for the testing framework</li>
-<li>Contributors who have helped improve this tool</li>
+<li>The <a href="https://github.com/bats-core/bats-core">BATS project</a> for the testing framework</li>
+<li>The command <code>curl -IL https://httpbin.org/redirect/2</code> that led me to create this project</li>
+<li>The amazing <a href="https://github.com/projectdiscovery/httpx">httpx</a> as inspiration and a powerful alternative to this humble project</li>
 </ul>
