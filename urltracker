@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.0.1"
+VERSION="v1.0.2"
 
 # Colors
 RESET="\033[0m"
@@ -391,7 +391,8 @@ fi
 if [ -n "$LIST_FILE" ]; then
     # Process each URL from the file
     while IFS= read -r url || [ -n "$url" ]; do
-        # Skip empty lines and comments
+        # Trim spaces and skip empty lines or comments
+        url=$(echo "$url" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
         if [ -n "$url" ] && [[ ! "$url" =~ ^[[:space:]]*# ]]; then
             if [ "$VERBOSITY" != "quiet" ]; then
                 process_url "$url" "$CSV_FILE" "$VERBOSITY" "$USE_COLOR"
