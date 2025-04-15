@@ -22,6 +22,11 @@
 <li><code>BATS</code> (Bash Automated Testing System) for running tests</li>
 </ul>
 <h2>Installation</h2>
+<h3>Via Homebrew</h3>
+<pre><code class="language-bash">brew tap nalmeida/urltracker
+brew install urltracker
+</code></pre>
+<h3>Via git clone</h3>
 <ol>
 <li>Clone this repository:</li>
 </ol>
@@ -31,16 +36,16 @@ cd urltracker
 <ol start="2">
 <li>Make the script executable:</li>
 </ol>
-<pre><code class="language-bash">chmod +x urltracker.sh
+<pre><code class="language-bash">chmod +x urltracker
 </code></pre>
 <ol start="3">
 <li>(Optional) Create a symlink to use it from anywhere:</li>
 </ol>
-<pre><code class="language-bash">sudo ln -s $(pwd)/urltracker.sh /usr/local/bin/urltracker
+<pre><code class="language-bash">sudo ln -s $(pwd)/urltracker /usr/local/bin/urltracker
 </code></pre>
 <h2>Usage</h2>
 <h3>Basic URL Check</h3>
-<pre><code class="language-bash">./urltracker.sh https://httpbin.org/status/200
+<pre><code class="language-bash">./urltracker https://httpbin.org/status/200
 </code></pre>
 <h3>Process a List of URLs</h3>
 <p>Create a text file with one URL per line:</p>
@@ -49,33 +54,34 @@ https://httpbin.org/redirect/2
 https://httpbin.org/status/404
 </code></pre>
 <p>Then run:</p>
-<pre><code class="language-bash">./urltracker.sh --list urls.txt
+<pre><code class="language-bash">./urltracker --list urls.txt
 </code></pre>
 <h3>Output to CSV</h3>
-<pre><code class="language-bash">./urltracker.sh --list urls.txt --output results.csv
+<pre><code class="language-bash">./urltracker --list urls.txt --output results.csv
 </code></pre>
 <h3>Using Authentication</h3>
-<pre><code class="language-bash">./urltracker.sh --auth user:pass https://httpbin.org/basic-auth/user/pass
+<pre><code class="language-bash">./urltracker --auth user:pass https://httpbin.org/basic-auth/user/pass
 </code></pre>
 <h3>Using Custom Headers</h3>
-<pre><code class="language-bash">./urltracker.sh --header &quot;User-Agent: Mozilla/5.0&quot; --header &quot;Accept-Language: en-US&quot; https://httpbin.org/status/200
+<pre><code class="language-bash">./urltracker --header &quot;User-Agent: Mozilla/5.0&quot; --header &quot;Accept-Language: en-US&quot; https://httpbin.org/status/200
 </code></pre>
 <h3>Verbose Output</h3>
-<pre><code class="language-bash">./urltracker.sh --verbose https://httpbin.org/redirect/2
+<pre><code class="language-bash">./urltracker --verbose https://httpbin.org/redirect/2
 </code></pre>
 <h3>Full Options List</h3>
-<pre><code>Usage: urltracker.sh [OPTIONS] [URL]
+<pre><code>Usage: urltracker [OPTIONS] [URL]
 
 Options:
-  --help, -h         Show this help message
-  --verbose, -v      Enable verbose output
-  --quiet, -q        Suppress all output
-  --no-color         Disable colored output
-  --list FILE        Process URLs from FILE (one URL per line)
-  --output FILE      Save results to CSV FILE
-  --auth USER:PASS   Use basic authentication
-  --header HEADER    Add custom header (can be used multiple times)
-  --cookie COOKIE    Add cookie (can be used multiple times)
+  -h, --help           Display this help message
+  -V, --version        Display the version
+  -l, --list &lt;file&gt;    Process a list of URLs from a text file
+  -o, --output &lt;file&gt;  Export results to a CSV file
+  -v, --verbose        Verbose mode: show all redirect URLs
+  -q, --quiet          Quiet mode: no output to console
+  -nc, --no-color      Disable colored output
+  -a, --auth &lt;user:password&gt;   Use HTTP Basic Authentication
+  -H, --header &lt;header&gt;        Add custom header (can be used multiple times)
+  -c, --cookie &lt;name=value&gt;    Add a cookie (can be used multiple times)
 </code></pre>
 <h2>Development</h2>
 <h3>Running Tests</h3>
