@@ -45,7 +45,7 @@ cd urltracker
 </code></pre>
 <h2>Usage</h2>
 <h3>Basic URL Check</h3>
-<pre><code class="language-bash">./urltracker https://httpbin.org/status/200
+<pre><code class="language-bash">urltracker https://httpbin.org/status/200
 </code></pre>
 <h3>Process a List of URLs</h3>
 <p>Create a text file with one URL per line:</p>
@@ -54,19 +54,19 @@ https://httpbin.org/redirect/2
 https://httpbin.org/status/404
 </code></pre>
 <p>Then run:</p>
-<pre><code class="language-bash">./urltracker --list urls.txt
+<pre><code class="language-bash">urltracker --list urls.txt
 </code></pre>
 <h3>Output to CSV</h3>
-<pre><code class="language-bash">./urltracker --list urls.txt --output results.csv
+<pre><code class="language-bash">urltracker --list urls.txt --output results.csv
 </code></pre>
 <h3>Using Authentication</h3>
-<pre><code class="language-bash">./urltracker --auth user:pass https://httpbin.org/basic-auth/user/pass
+<pre><code class="language-bash">urltracker --auth user:pass https://httpbin.org/basic-auth/user/pass
 </code></pre>
 <h3>Using Custom Headers</h3>
-<pre><code class="language-bash">./urltracker --header &quot;User-Agent: Mozilla/5.0&quot; --header &quot;Accept-Language: en-US&quot; https://httpbin.org/status/200
+<pre><code class="language-bash">urltracker --header &quot;User-Agent: Mozilla/5.0&quot; --header &quot;Accept-Language: en-US&quot; https://httpbin.org/status/200
 </code></pre>
 <h3>Verbose Output</h3>
-<pre><code class="language-bash">./urltracker --verbose https://httpbin.org/redirect/2
+<pre><code class="language-bash">urltracker --verbose https://httpbin.org/redirect/2
 </code></pre>
 <h3>Full Options List</h3>
 <pre><code>Usage: urltracker [OPTIONS] [URL]
