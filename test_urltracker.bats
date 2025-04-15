@@ -18,13 +18,12 @@ TEST_REDIRECT_URL="https://httpbin.org/redirect/2"
 TEST_AUTH_URL="https://httpbin.org/basic-auth/user/pass"
 TEST_FILE="test_urls.txt"
 TEST_OUTPUT="test_output.csv"
-TEST_SERVER_PORT=8000
 
 # Setup - executed before each test
 setup() {
   # Create temporary file with test URLs
   cat > "$TEST_FILE" << EOF
-https://httpbin.org/status/200
+https://httpbin.org/status/200   
 https://httpbin.org/status/404
 https://httpbin.org/status/500
 # Comment that should be ignored
@@ -80,43 +79,6 @@ execute_with_output() {
   echo "=== END EXECUTION ==="
   echo
   return $result
-}
-
-# Utility to start a simple test server
-start_test_server() {
-  echo "=== STARTING TEST SERVER ==="
-  
-  # Check if python3 is available, otherwise try python
-  if command -v python3 &> /dev/null; then
-    python_cmd="python3"
-    echo "Using Python 3 for test server"
-  elif command -v python &> /dev/null; then
-    python_cmd="python"
-    echo "Using Python 2 for test server"
-  else
-    echo "Python not found. Some tests may fail." >&2
-    return 1
-  fi
-  
-  # Create temporary directory
-  tmp_dir=$(mktemp -d)
-  echo "Created temporary directory: $tmp_dir"
-  
-  # Create test page
-  echo "<html><body>Test</body></html>" > "$tmp_dir/index.html"
-  echo "Created test HTML page"
-  
-  # Start simple HTTP server on test port
-  cd "$tmp_dir" && $python_cmd -m http.server $TEST_SERVER_PORT &
-  PID_SERVER=$!
-  echo "Server started with PID: $PID_SERVER"
-  
-  # Wait for server to start
-  sleep 1
-  echo "=== SERVER STARTED ==="
-  echo
-  
-  echo "$tmp_dir"
 }
 
 # ==================== TESTS ====================
@@ -191,13 +153,19 @@ start_test_server() {
   echo "TEST: Checking URL list processing from file"
   
   # Execute command with output display
-  output=$(execute_with_output "$SCRIPT_PATH --list $TEST_FILE")
+  output=$(execute_with_output "$SCRIPT_PATH --no-color --list $TEST_FILE")
   
   # Validate the URL list processing
   echo "Validating URL list processing:"
-  count=$(echo "$output" | grep -c "https://httpbin.org")
-  [ "$count" -eq 4 ] && echo "✓ Processed 4 URLs from file"
-  [[ "$output" != *"Comment"* ]] && echo "✓ Comments were ignored"
+  
+  # Check if each URL and its expected status code are in the output
+  echo "$output" | grep -q "^https://httpbin.org/status/200 \[200\] https://httpbin.org/status/200$" && echo "✓ URL 1 processed correctly (200)" || { echo "✗ URL 1 failed"; return 1; }
+  echo "$output" | grep -q "^https://httpbin.org/status/404 \[404\] https://httpbin.org/status/404$" && echo "✓ URL 2 processed correctly (404)" || { echo "✗ URL 2 failed"; return 1; }
+  echo "$output" | grep -q "^https://httpbin.org/status/500 \[500\] https://httpbin.org/status/500$" && echo "✓ URL 3 processed correctly (500)" || { echo "✗ URL 3 failed"; return 1; }
+  echo "$output" | grep -q "^https://httpbin.org/redirect/1 \[302;200\] https://httpbin.org/get$" && echo "✓ URL 4 processed correctly (302;200)" || { echo "✗ URL 4 failed"; return 1; }
+  
+  # Ensure comments are ignored
+  [[ "$output" != *"Comment"* ]] && echo "✓ Comments were ignored" || { echo "✗ Comments were not ignored"; return 1; }
 }
 
 @test "Output results to CSV file in correct format" {
