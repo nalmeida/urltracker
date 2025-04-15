@@ -57,7 +57,7 @@ sudo ln -s $(pwd)/urltracker /usr/local/bin/urltracker
 ### Basic URL Check
 
 ```bash
-./urltracker https://httpbin.org/status/200
+urltracker https://httpbin.org/status/200
 ```
 
 ### Process a List of URLs
@@ -71,31 +71,31 @@ https://httpbin.org/status/404
 
 Then run:
 ```bash
-./urltracker --list urls.txt
+urltracker --list urls.txt
 ```
 
 ### Output to CSV
 
 ```bash
-./urltracker --list urls.txt --output results.csv
+urltracker --list urls.txt --output results.csv
 ```
 
 ### Using Authentication
 
 ```bash
-./urltracker --auth user:pass https://httpbin.org/basic-auth/user/pass
+urltracker --auth user:pass https://httpbin.org/basic-auth/user/pass
 ```
 
 ### Using Custom Headers
 
 ```bash
-./urltracker --header "User-Agent: Mozilla/5.0" --header "Accept-Language: en-US" https://httpbin.org/status/200
+urltracker --header "User-Agent: Mozilla/5.0" --header "Accept-Language: en-US" https://httpbin.org/status/200
 ```
 
 ### Verbose Output
 
 ```bash
-./urltracker --verbose https://httpbin.org/redirect/2
+urltracker --verbose https://httpbin.org/redirect/2
 ```
 
 ### Full Options List
