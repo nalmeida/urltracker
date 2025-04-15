@@ -5,7 +5,7 @@ Set Padding 18
 Set Width 800
 Set Height 360
 
-Type "./urltracker.sh https://httpbin.org/status/200"
+Type "./urltracker https://httpbin.org/status/200"
 Enter
 Wait
 Sleep 4
@@ -14,7 +14,7 @@ Type "clear"
 Enter
 
 Sleep .5
-Type "./urltracker.sh --list list.txt"
+Type "./urltracker --list list.txt"
 Enter
 Wait
 Sleep 4
@@ -23,7 +23,7 @@ Type "clear"
 Enter
 
 Sleep .5
-Type "./urltracker.sh https://httpbin.org/redirect/2 --verbose"
+Type "./urltracker https://httpbin.org/redirect/2 --verbose"
 Enter
 Wait
 Sleep 6

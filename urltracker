@@ -1,5 +1,7 @@
 #!/bin/bash
 
+VERSION="v1.0.1"
+
 # Colors
 RESET="\033[0m"
 GREEN="\033[0;32m"
@@ -44,12 +46,19 @@ get_status_color() {
     esac
 }
 
+# Version function
+show_version() {
+  echo "$(basename "$0") $VERSION"
+}
 # Help function
 show_help() {
+    echo -e "${YELLOW}[${RESET} urltracker $VERSION ${YELLOW}]${RESET} ${YELLOW}•${RESET}\033[0;90m @nalmeida\033[0m"
+    echo ""
     echo "Usage: $0 [options] [URL]"
     echo ""
     echo "Options:"
     echo "  -h, --help           Display this help message"
+    echo "  -V, --version        Display the version"
     echo "  -l, --list <file>    Process a list of URLs from a text file"
     echo "  -o, --output <file>  Export results to a CSV file"
     echo "  -v, --verbose        Verbose mode: show all redirect URLs"
@@ -285,6 +294,10 @@ while [ $# -gt 0 ]; do
     case "$1" in
         -h|--help)
             show_help
+            ;;
+        -V|--version)
+            show_version
+            exit 0
             ;;
         -l|--list)
             if [ -z "$2" ] || [ ! -f "$2" ]; then

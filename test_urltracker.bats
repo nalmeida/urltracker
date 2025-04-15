@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-# Unit test script for urltracker.sh
+# Unit test script for urltracker
 # Requires BATS: https://github.com/bats-core/bats-core
 # MacOS installation: brew install bats-core
 # Run with: bats --show-output-of-passing-tests --verbose test_urltracker.bats
@@ -12,7 +12,7 @@
 # load 'bats-assert/load.bash'
 
 # Configuration variables
-SCRIPT_PATH="./urltracker.sh"
+SCRIPT_PATH="./urltracker"
 TEST_URL="https://httpbin.org"
 TEST_REDIRECT_URL="https://httpbin.org/redirect/2"
 TEST_AUTH_URL="https://httpbin.org/basic-auth/user/pass"
@@ -134,6 +134,17 @@ start_test_server() {
   grep -q "\-\-auth" <<< "$(execute_with_output "$SCRIPT_PATH --help")" && echo "✓ Contains '--auth' option"
   grep -q "\-\-header" <<< "$(execute_with_output "$SCRIPT_PATH --help")" && echo "✓ Contains '--header' option"
   grep -q "\-\-cookie" <<< "$(execute_with_output "$SCRIPT_PATH --help")" && echo "✓ Contains '--cookie' option"
+}
+
+@test "Display version information when --version flag is provided" {
+  echo "TEST: Checking if version information is displayed correctly"
+  
+  # Execute command with output display
+  execute_with_output "$SCRIPT_PATH --version"
+  
+  # Validate output contains version
+  echo "Validating version output contains:"
+  grep -q "urltracker v" <<< "$(execute_with_output "$SCRIPT_PATH --version")" && echo "✓ Contains 'Options' section"
 }
 
 @test "Check single URL status and display results correctly" {

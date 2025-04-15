@@ -27,6 +27,15 @@ URL Tracker helps you analyze HTTP responses and redirects for single URLs or li
 
 ## Installation
 
+### Via Homebrew
+
+```bash
+brew tap nalmeida/urltracker
+brew install urltracker
+```
+
+### Via git clone 
+
 1. Clone this repository:
 ```bash
 git clone https://github.com/nalmeida/urltracker.git
@@ -35,12 +44,12 @@ cd urltracker
 
 2. Make the script executable:
 ```bash
-chmod +x urltracker.sh
+chmod +x urltracker
 ```
 
 3. (Optional) Create a symlink to use it from anywhere:
 ```bash
-sudo ln -s $(pwd)/urltracker.sh /usr/local/bin/urltracker
+sudo ln -s $(pwd)/urltracker /usr/local/bin/urltracker
 ```
 
 ## Usage
@@ -48,7 +57,7 @@ sudo ln -s $(pwd)/urltracker.sh /usr/local/bin/urltracker
 ### Basic URL Check
 
 ```bash
-./urltracker.sh https://httpbin.org/status/200
+./urltracker https://httpbin.org/status/200
 ```
 
 ### Process a List of URLs
@@ -62,48 +71,49 @@ https://httpbin.org/status/404
 
 Then run:
 ```bash
-./urltracker.sh --list urls.txt
+./urltracker --list urls.txt
 ```
 
 ### Output to CSV
 
 ```bash
-./urltracker.sh --list urls.txt --output results.csv
+./urltracker --list urls.txt --output results.csv
 ```
 
 ### Using Authentication
 
 ```bash
-./urltracker.sh --auth user:pass https://httpbin.org/basic-auth/user/pass
+./urltracker --auth user:pass https://httpbin.org/basic-auth/user/pass
 ```
 
 ### Using Custom Headers
 
 ```bash
-./urltracker.sh --header "User-Agent: Mozilla/5.0" --header "Accept-Language: en-US" https://httpbin.org/status/200
+./urltracker --header "User-Agent: Mozilla/5.0" --header "Accept-Language: en-US" https://httpbin.org/status/200
 ```
 
 ### Verbose Output
 
 ```bash
-./urltracker.sh --verbose https://httpbin.org/redirect/2
+./urltracker --verbose https://httpbin.org/redirect/2
 ```
 
 ### Full Options List
 
 ```
-Usage: urltracker.sh [OPTIONS] [URL]
+Usage: urltracker [OPTIONS] [URL]
 
 Options:
-  --help, -h         Show this help message
-  --verbose, -v      Enable verbose output
-  --quiet, -q        Suppress all output
-  --no-color         Disable colored output
-  --list FILE        Process URLs from FILE (one URL per line)
-  --output FILE      Save results to CSV FILE
-  --auth USER:PASS   Use basic authentication
-  --header HEADER    Add custom header (can be used multiple times)
-  --cookie COOKIE    Add cookie (can be used multiple times)
+  -h, --help           Display this help message
+  -V, --version        Display the version
+  -l, --list <file>    Process a list of URLs from a text file
+  -o, --output <file>  Export results to a CSV file
+  -v, --verbose        Verbose mode: show all redirect URLs
+  -q, --quiet          Quiet mode: no output to console
+  -nc, --no-color      Disable colored output
+  -a, --auth <user:password>   Use HTTP Basic Authentication
+  -H, --header <header>        Add custom header (can be used multiple times)
+  -c, --cookie <name=value>    Add a cookie (can be used multiple times)
 ```
 
 ## Development
