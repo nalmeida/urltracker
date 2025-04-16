@@ -5,7 +5,7 @@
 # MacOS installation: brew install bats-core
 # Run with: bats --show-output-of-passing-tests --verbose test_urltracker.bats
 
-# Install bats-support and bats-assert libraries for better output
+# Install bats-support and bats-assert libraries for better output 
 # git clone https://github.com/bats-core/bats-support.git
 # git clone https://github.com/bats-core/bats-assert.git
 # load 'bats-support/load.bash'
@@ -16,6 +16,7 @@ SCRIPT_PATH="./urltracker"
 TEST_URL="https://httpbin.org"
 TEST_REDIRECT_URL="https://httpbin.org/redirect/2"
 TEST_AUTH_URL="https://httpbin.org/basic-auth/user/pass"
+TEST_SPECIAL_URL="https://httpbin.org/get?param1=value1&param2=value2%20with%20spaces~#fragment"
 TEST_FILE="test_urls.txt"
 TEST_OUTPUT="test_output.csv"
 
@@ -28,6 +29,8 @@ https://httpbin.org/status/404
 https://httpbin.org/status/500
 # Comment that should be ignored
 https://httpbin.org/redirect/1
+https://httpbin.org/get?param=value&other=data
+https://httpbin.org/get?special=%20%23~&weird=value
 EOF
 
   # Ensure the script has execution permissions
@@ -113,7 +116,7 @@ execute_with_output() {
   echo "TEST: Checking single URL status checking functionality"
   
   # Execute command with output display
-  output=$(execute_with_output "$SCRIPT_PATH $TEST_URL")
+  output=$(execute_with_output "$SCRIPT_PATH \"$TEST_URL\"")
   
   # Validate the output
   echo "Validating URL check output:"
@@ -121,11 +124,43 @@ execute_with_output() {
   [[ "$output" == *"["* ]] && [[ "$output" == *"]"* ]] && echo "✓ Contains status code in brackets"
 }
 
+@test "Handle URLs with special characters correctly" {
+  echo "TEST: Checking special character URL handling"
+  
+  # Execute command with output display - note the quotes around the URL!
+  output=$(execute_with_output "$SCRIPT_PATH \"$TEST_SPECIAL_URL\"")
+  
+  # Validate handling of special characters
+  echo "Validating special character handling:"
+  [[ "$output" == *"$TEST_SPECIAL_URL"* ]] && echo "✓ Contains the special character URL"
+  [[ "$output" == *"[200]"* ]] || [[ "$output" == *"200"* ]] && echo "✓ Successfully fetched URL with special characters"
+}
+
+@test "Handle URLs with query parameters in zsh" {
+  # Skip this test if not running in zsh
+  if [ "$(ps -p $$ -o comm=)" != "zsh" ]; then
+    skip "This test is only for zsh shell"
+  fi
+  
+  echo "TEST: Checking URL with query parameters in zsh"
+  
+  # Test with a URL that would cause problems in zsh
+  local test_url="https://example.com/page?param=value&other=test"
+  
+  # Execute command with output display - MUST use quotes around URL
+  output=$(execute_with_output "$SCRIPT_PATH \"$test_url\"")
+  
+  # Validate the URL was processed correctly
+  echo "Validating URL with query parameters in zsh:"
+  [[ "$output" == *"$test_url"* ]] && echo "✓ Contains the URL with query parameters"
+  [ $? -eq 0 ] && echo "✓ Command executed successfully without zsh globbing errors"
+}
+
 @test "Display detailed information in verbose mode" {
   echo "TEST: Checking verbose mode output"
   
   # Execute command with output display
-  output=$(execute_with_output "$SCRIPT_PATH --verbose $TEST_REDIRECT_URL")
+  output=$(execute_with_output "$SCRIPT_PATH --verbose \"$TEST_REDIRECT_URL\"")
   
   # Validate the verbose output
   echo "Validating verbose mode output:"
@@ -138,7 +173,7 @@ execute_with_output() {
   echo "TEST: Checking quiet mode produces no output"
   
   # Execute command and capture its output
-  output=$(execute_with_output "$SCRIPT_PATH --quiet $TEST_URL" 2>&1)
+  output=$(execute_with_output "$SCRIPT_PATH --quiet \"$TEST_URL\"" 2>&1)
   
   # Check if there's no output in the command result section
   if [[ ! "$output" =~ "OUTPUT START".*"OUTPUT END" ]] || [[ "$output" =~ "OUTPUT START".+?[^\s].+?"OUTPUT END" ]]; then
@@ -153,7 +188,7 @@ execute_with_output() {
   echo "TEST: Checking URL list processing from file"
   
   # Execute command with output display
-  output=$(execute_with_output "$SCRIPT_PATH --no-color --list $TEST_FILE")
+  output=$(execute_with_output "$SCRIPT_PATH --no-color --list \"$TEST_FILE\"")
   
   # Validate the URL list processing
   echo "Validating URL list processing:"
@@ -164,6 +199,10 @@ execute_with_output() {
   echo "$output" | grep -q "^https://httpbin.org/status/500 \[500\] https://httpbin.org/status/500$" && echo "✓ URL 3 processed correctly (500)" || { echo "✗ URL 3 failed"; return 1; }
   echo "$output" | grep -q "^https://httpbin.org/redirect/1 \[302;200\] https://httpbin.org/get$" && echo "✓ URL 4 processed correctly (302;200)" || { echo "✗ URL 4 failed"; return 1; }
   
+  # Ensure special character URLs work
+  echo "$output" | grep -q "^https://httpbin.org/get?param=value&other=data" && echo "✓ URL 5 with query parameters processed correctly" || { echo "✗ URL 5 failed"; return 1; }
+  echo "$output" | grep -q "^https://httpbin.org/get?special=%20%23~&weird=value" && echo "✓ URL 6 with special characters processed correctly" || { echo "✗ URL 6 failed"; return 1; }
+  
   # Ensure comments are ignored
   [[ "$output" != *"Comment"* ]] && echo "✓ Comments were ignored" || { echo "✗ Comments were not ignored"; return 1; }
 }
@@ -172,18 +211,18 @@ execute_with_output() {
   echo "TEST: Checking CSV output functionality"
   
   # Execute command with output display
-  execute_with_output "$SCRIPT_PATH --list $TEST_FILE --output $TEST_OUTPUT"
+  execute_with_output "$SCRIPT_PATH --list \"$TEST_FILE\" --output \"$TEST_OUTPUT\""
   
   # Display the content of the generated CSV file
   echo "Generated CSV file content:"
-  execute_with_output "cat $TEST_OUTPUT"
+  execute_with_output "cat \"$TEST_OUTPUT\""
   
   # Validate the CSV output
   echo "Validating CSV output:"
   [ -f "$TEST_OUTPUT" ] && echo "✓ CSV file was created"
   
   count=$(wc -l < "$TEST_OUTPUT")
-  [ "$count" -eq 5 ] && echo "✓ CSV contains correct number of lines (5 = 1 header + 4 URLs)"
+  [ "$count" -eq 7 ] && echo "✓ CSV contains correct number of lines (7 = 1 header + 6 URLs)"
   
   header=$(head -n 1 "$TEST_OUTPUT")
   [[ "$header" == "Origin,StatusCode,EffectiveUrl" ]] && echo "✓ CSV header format is correct"
@@ -193,7 +232,7 @@ execute_with_output() {
   echo "TEST: Checking no-color mode output"
   
   # Execute command with output display
-  output=$(execute_with_output "$SCRIPT_PATH --no-color $TEST_URL")
+  output=$(execute_with_output "$SCRIPT_PATH --no-color \"$TEST_URL\"")
   
   # Validate no color codes in output
   echo "Validating no-color mode:"
@@ -204,7 +243,7 @@ execute_with_output() {
   echo "TEST: Checking basic authentication functionality"
   
   # Execute command with output display
-  output=$(execute_with_output "$SCRIPT_PATH --auth \"user:pass\" $TEST_AUTH_URL")
+  output=$(execute_with_output "$SCRIPT_PATH --auth \"user:pass\" \"$TEST_AUTH_URL\"")
   
   # Validate authentication success
   echo "Validating authentication result:"
@@ -220,7 +259,7 @@ execute_with_output() {
   echo "TEST: Checking custom headers functionality"
   
   # Execute command with output display
-  output=$(execute_with_output "$SCRIPT_PATH --header \"X-Test-Header: TestValue\" $TEST_URL/headers --verbose")
+  output=$(execute_with_output "$SCRIPT_PATH --header \"X-Test-Header: TestValue\" \"$TEST_URL/headers\" --verbose")
   
   # Validate custom header request completed
   echo "Validating custom header request:"
@@ -231,7 +270,7 @@ execute_with_output() {
   echo "TEST: Checking cookie functionality"
   
   # Execute command with output display
-  output=$(execute_with_output "$SCRIPT_PATH --cookie \"testcookie=value\" $TEST_URL/cookies --verbose")
+  output=$(execute_with_output "$SCRIPT_PATH --cookie \"testcookie=value\" \"$TEST_URL/cookies\" --verbose")
   
   # Validate cookie request completed
   echo "Validating cookie request:"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.0.2"
+VERSION="v1.0.3"
 
 # Colors
 RESET="\033[0m"
@@ -78,6 +78,9 @@ show_help() {
     echo "  $0 --cookie \"session=abc123\" https://example.com"
     echo "  $0 --quiet --list urls.txt --output results.csv"
     echo ""
+    echo "Note: For URLs with special characters (?, &, etc.), enclose the URL in quotes:"
+    echo "  $0 \"https://example.com/page?param=value&other=data\""
+    echo ""
     echo "The script displays information in the format:"
     echo "  <ORIGINAL_URL> [STATUS_CODES_LIST] <FINAL_URL>"
     echo ""
@@ -102,21 +105,21 @@ build_curl_command() {
     
     # Add authentication if provided
     if [ -n "$AUTH" ]; then
-        cmd="$cmd -u '$AUTH'"
+        cmd="$cmd --user $(printf %q "$AUTH")"
     fi
     
     # Add headers if provided
     for header in "${HEADERS[@]}"; do
-        cmd="$cmd -H '$header'"
+        cmd="$cmd --header $(printf %q "$header")"
     done
     
     # Add cookies if provided
     for cookie in "${COOKIES[@]}"; do
-        cmd="$cmd -b '$cookie'"
+        cmd="$cmd --cookie $(printf %q "$cookie")"
     done
     
-    # Add URL (quoted to handle special characters)
-    cmd="$cmd '$url'"
+    # Add URL (using printf %q to properly escape special characters)
+    cmd="$cmd $(printf %q "$url")"
     
     echo "$cmd"
 }
@@ -264,7 +267,8 @@ process_url() {
     
     # Export to CSV if requested
     if [ -n "$CSV_FILE" ]; then
-        echo "\"$URL\",\"$status_csv\",\"$effective_url\"" >> "$CSV_FILE"
+        # Properly escape CSV fields
+        echo "\"$(echo "$URL" | sed 's/"/""/g')\",\"$status_csv\",\"$(echo "$effective_url" | sed 's/"/""/g')\"" >> "$CSV_FILE"
     fi
 }
 
