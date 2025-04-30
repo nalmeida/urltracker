@@ -34,6 +34,9 @@ brew tap nalmeida/urltracker
 brew install urltracker
 ```
 
+> [!NOTE]
+> [URL Tracker Homebrew Formula](https://github.com/nalmeida/urltracker)
+
 ### Via git clone 
 
 1. Clone this repository:
