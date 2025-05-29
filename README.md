@@ -2,7 +2,7 @@
 
 ![urltracker demo](docs/demo/demo.gif)
 
-> A command-line tool to check HTTP status codes and track redirections for URLs.
+> A command-line tool to check HTTP status codes and track redirects.
 
 Github repo: [https://github.com/nalmeida/urltracker](https://github.com/nalmeida/urltracker)
 
@@ -13,13 +13,13 @@ URL Tracker helps you analyze HTTP responses and redirects for single URLs or li
 ### Features:
 
 - Single URL status checking
-- Batch URL processing from a file
+- Batch URL processing from a txt file
 - Redirect chain tracking
 - CSV output for further analysis
 - Basic authentication support
 - Custom headers and cookies
 
-## Prerequisites
+## Requirements
 
 - Bash shell environment
 - `curl` command-line tool
@@ -35,7 +35,7 @@ brew install urltracker
 ```
 
 > [!NOTE]
-> [URL Tracker Homebrew Formula](https://github.com/nalmeida/urltracker)
+> [URL Tracker Homebrew Formula](https://github.com/nalmeida/homebrew-urltracker)
 
 ### Via git clone 
 
@@ -65,7 +65,7 @@ urltracker https://httpbin.org/status/200
 
 ### Process a List of URLs
 
-Create a text file with one URL per line:
+Create a text file with one URL per line (e.g.: `urls.txt`):
 ```
 https://httpbin.org/status/200
 https://httpbin.org/redirect/2
@@ -98,7 +98,7 @@ urltracker --header "User-Agent: Mozilla/5.0" --header "Accept-Language: en-US" 
 ### Verbose Output
 
 ```bash
-urltracker --verbose https://httpbin.org/redirect/2
+urltracker https://httpbin.org/redirect/2 --verbose
 ```
 
 ### Full Options List
@@ -107,13 +107,13 @@ urltracker --verbose https://httpbin.org/redirect/2
 Usage: urltracker [OPTIONS] [URL]
 
 Options:
-  -h, --help           Display this help message
-  -V, --version        Display the version
-  -l, --list <file>    Process a list of URLs from a text file
-  -o, --output <file>  Export results to a CSV file
-  -v, --verbose        Verbose mode: show all redirect URLs
-  -q, --quiet          Quiet mode: no output to console
-  -nc, --no-color      Disable colored output
+  -h, --help                   Display this help message
+  -V, --version                Display the version
+  -l, --list <file>            Process a list of URLs from a text file
+  -o, --output <file>          Export results to a CSV file
+  -v, --verbose                Verbose mode: show all redirect URLs
+  -q, --quiet                  Quiet mode: no output to console
+  -nc, --no-color              Disable colored output
   -a, --auth <user:password>   Use HTTP Basic Authentication
   -H, --header <header>        Add custom header (can be used multiple times)
   -c, --cookie <name=value>    Add a cookie (can be used multiple times)
@@ -123,7 +123,7 @@ Options:
 
 ### Running Tests
 
-This project uses BATS (Bash Automated Testing System) for testing. To run the tests:
+This project uses [BATS](https://github.com/bats-core/bats-core) (Bash Automated Testing System) for testing. To run the tests:
 
 1. Install BATS if you don't have it:
 ```bash
