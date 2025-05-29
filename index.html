@@ -24,7 +24,7 @@
 			<h1>URL Tracker</h1>
 <p><img src="docs/demo/demo.gif" alt="urltracker demo"></p>
 <blockquote>
-<p>A command-line tool to check HTTP status codes and track redirections for URLs.</p>
+<p>A command-line tool to check HTTP status codes and track redirects.</p>
 </blockquote>
 <p>Github repo: <a href="https://github.com/nalmeida/urltracker">https://github.com/nalmeida/urltracker</a></p>
 <h2>Overview</h2>
@@ -32,13 +32,13 @@
 <h3>Features:</h3>
 <ul>
 <li>Single URL status checking</li>
-<li>Batch URL processing from a file</li>
+<li>Batch URL processing from a txt file</li>
 <li>Redirect chain tracking</li>
 <li>CSV output for further analysis</li>
 <li>Basic authentication support</li>
 <li>Custom headers and cookies</li>
 </ul>
-<h2>Prerequisites</h2>
+<h2>Requirements</h2>
 <ul>
 <li>Bash shell environment</li>
 <li><code>curl</code> command-line tool</li>
@@ -51,7 +51,7 @@ brew install urltracker
 </code></pre>
 <blockquote>
 <p>[!NOTE]
-<a href="https://github.com/nalmeida/urltracker">URL Tracker Homebrew Formula</a></p>
+<a href="https://github.com/nalmeida/homebrew-urltracker">URL Tracker Homebrew Formula</a></p>
 </blockquote>
 <h3>Via git clone</h3>
 <ol>
@@ -75,7 +75,7 @@ cd urltracker
 <pre><code class="language-bash">urltracker https://httpbin.org/status/200
 </code></pre>
 <h3>Process a List of URLs</h3>
-<p>Create a text file with one URL per line:</p>
+<p>Create a text file with one URL per line (e.g.: <code>urls.txt</code>):</p>
 <pre><code>https://httpbin.org/status/200
 https://httpbin.org/redirect/2
 https://httpbin.org/status/404
@@ -93,26 +93,26 @@ https://httpbin.org/status/404
 <pre><code class="language-bash">urltracker --header &quot;User-Agent: Mozilla/5.0&quot; --header &quot;Accept-Language: en-US&quot; https://httpbin.org/status/200
 </code></pre>
 <h3>Verbose Output</h3>
-<pre><code class="language-bash">urltracker --verbose https://httpbin.org/redirect/2
+<pre><code class="language-bash">urltracker https://httpbin.org/redirect/2 --verbose
 </code></pre>
 <h3>Full Options List</h3>
 <pre><code>Usage: urltracker [OPTIONS] [URL]
 
 Options:
-  -h, --help           Display this help message
-  -V, --version        Display the version
-  -l, --list &lt;file&gt;    Process a list of URLs from a text file
-  -o, --output &lt;file&gt;  Export results to a CSV file
-  -v, --verbose        Verbose mode: show all redirect URLs
-  -q, --quiet          Quiet mode: no output to console
-  -nc, --no-color      Disable colored output
+  -h, --help                   Display this help message
+  -V, --version                Display the version
+  -l, --list &lt;file&gt;            Process a list of URLs from a text file
+  -o, --output &lt;file&gt;          Export results to a CSV file
+  -v, --verbose                Verbose mode: show all redirect URLs
+  -q, --quiet                  Quiet mode: no output to console
+  -nc, --no-color              Disable colored output
   -a, --auth &lt;user:password&gt;   Use HTTP Basic Authentication
   -H, --header &lt;header&gt;        Add custom header (can be used multiple times)
   -c, --cookie &lt;name=value&gt;    Add a cookie (can be used multiple times)
 </code></pre>
 <h2>Development</h2>
 <h3>Running Tests</h3>
-<p>This project uses BATS (Bash Automated Testing System) for testing. To run the tests:</p>
+<p>This project uses <a href="https://github.com/bats-core/bats-core">BATS</a> (Bash Automated Testing System) for testing. To run the tests:</p>
 <ol>
 <li>Install BATS if you don't have it:</li>
 </ol>
