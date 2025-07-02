@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.0.3"
+VERSION="v1.1.0"
 
 # Colors
 RESET="\033[0m"
@@ -117,6 +117,9 @@ build_curl_command() {
     for cookie in "${COOKIES[@]}"; do
         cmd="$cmd --cookie $(printf %q "$cookie")"
     done
+
+    # Add max timeout option for all 
+    cmd="$cmd --max-time 10"
     
     # Add URL (using printf %q to properly escape special characters)
     cmd="$cmd $(printf %q "$url")"
