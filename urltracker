@@ -11,7 +11,7 @@ BLUE="\033[0;34m"
 CYAN="\033[0;36m"
 
 # Override default user agent User-Agent: curl/7.54.1
-OVERRIDE_USER_AGENT="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+OVERRIDE_USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 
 # Function to get color for a status code - compatible with older Bash
 get_status_color() {
