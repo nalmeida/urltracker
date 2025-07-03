@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.2.1"
+VERSION="v1.2.2"
 
 # Colors
 RESET="\033[0m"
@@ -12,6 +12,9 @@ CYAN="\033[0;36m"
 
 # Override default user agent User-Agent: curl/7.54.1
 OVERRIDE_USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+
+# Override default max timetout for curl requests (2min) to 10s
+OVERRIDE_MAX_TIMEOUT="10"
 
 # Function to get color for a status code - compatible with older Bash
 get_status_color() {
@@ -122,7 +125,9 @@ build_curl_command() {
     done
 
     # Add max timeout option for all 
-    cmd="$cmd --max-time 10"
+    if [ -n "$OVERRIDE_MAX_TIMEOUT" ]; then
+        cmd="$cmd --max-time $(printf %q "$OVERRIDE_MAX_TIMEOUT")"
+    fi
 
     # Replace original curl User Agent by a browser one
     if [ -n "$OVERRIDE_USER_AGENT" ]; then
