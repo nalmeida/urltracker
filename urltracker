@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.1.0"
+VERSION="v1.2.0"
 
 # Colors
 RESET="\033[0m"
@@ -9,6 +9,9 @@ YELLOW="\033[0;33m"
 RED="\033[0;31m"
 BLUE="\033[0;34m"
 CYAN="\033[0;36m"
+
+# Override default user agent User-Agent: curl/7.54.1
+OVERRIDE_USER_AGENT="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
 
 # Function to get color for a status code - compatible with older Bash
 get_status_color() {
@@ -120,6 +123,11 @@ build_curl_command() {
 
     # Add max timeout option for all 
     cmd="$cmd --max-time 10"
+
+    # Replace original curl User Agent by a browser one
+    if [ -n "$OVERRIDE_USER_AGENT" ]; then
+        cmd="$cmd -A $(printf %q "$OVERRIDE_USER_AGENT")"
+    fi
     
     # Add URL (using printf %q to properly escape special characters)
     cmd="$cmd $(printf %q "$url")"
