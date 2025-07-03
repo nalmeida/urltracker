@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.2.0"
+VERSION="v1.2.1"
 
 # Colors
 RESET="\033[0m"
