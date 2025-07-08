@@ -84,7 +84,6 @@ show_help() {
     echo "  $0 --list urls.txt"
     echo "  $0 --list urls.txt --output results.csv"
     echo "  $0 --verbose https://example.com"
-    echo "  $0 --method POST https://example.com"
     echo "  $0 --method HEAD --verbose https://example.com"
     echo "  $0 --auth username:password https://example.com"
     echo "  $0 --header \"User-Agent: Mozilla/5.0\" https://example.com"
