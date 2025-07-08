@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.2.2"
+VERSION="v1.3.1"
 
 # Colors
 RESET="\033[0m"
@@ -15,6 +15,9 @@ OVERRIDE_USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.3
 
 # Override default max timetout for curl requests (2min) to 10s
 OVERRIDE_MAX_TIMEOUT="10"
+
+# Default HTTP method
+DEFAULT_METHOD="GET"
 
 # Function to get color for a status code - compatible with older Bash
 get_status_color() {
@@ -56,6 +59,7 @@ get_status_color() {
 show_version() {
   echo "$(basename "$0") $VERSION"
 }
+
 # Help function
 show_help() {
     echo -e "${YELLOW}[${RESET} urltracker $VERSION ${YELLOW}]${RESET} ${YELLOW}•${RESET}\033[0;90m @nalmeida\033[0m"
@@ -70,6 +74,7 @@ show_help() {
     echo "  -v, --verbose        Verbose mode: show all redirect URLs"
     echo "  -q, --quiet          Quiet mode: no output to console"
     echo "  -nc, --no-color      Disable colored output"
+    echo "  -m, --method <method> HTTP method to use (default: GET)"
     echo "  -a, --auth <user:password>   Use HTTP Basic Authentication"
     echo "  -H, --header <header>        Add custom header (can be used multiple times)"
     echo "  -c, --cookie <name=value>    Add a cookie (can be used multiple times)"
@@ -79,6 +84,8 @@ show_help() {
     echo "  $0 --list urls.txt"
     echo "  $0 --list urls.txt --output results.csv"
     echo "  $0 --verbose https://example.com"
+    echo "  $0 --method POST https://example.com"
+    echo "  $0 --method HEAD --verbose https://example.com"
     echo "  $0 --auth username:password https://example.com"
     echo "  $0 --header \"User-Agent: Mozilla/5.0\" https://example.com"
     echo "  $0 --cookie \"session=abc123\" https://example.com"
@@ -93,6 +100,9 @@ show_help() {
     echo "When exporting to CSV, the following columns are included:"
     echo "  Origin,StatusCode,EffectiveUrl"
     echo ""
+    echo "Supported HTTP methods:"
+    echo "  GET, POST, PUT, DELETE, HEAD, OPTIONS, PATCH, TRACE"
+    echo ""
     echo "Color coding:"
     echo -e "  ${GREEN}Green${RESET}:  Success status codes (2xx)"
     echo -e "  ${YELLOW}Yellow${RESET}: Redirect status codes (3xx)"
@@ -105,9 +115,15 @@ show_help() {
 build_curl_command() {
     local base_cmd="$1"
     local url="$2"
+    local method="$3"
     
     # Start with base curl options
     local cmd="curl $base_cmd"
+    
+    # Add HTTP method
+    if [ -n "$method" ]; then
+        cmd="$cmd -X $(printf %q "$method")"
+    fi
     
     # Add authentication if provided
     if [ -n "$AUTH" ]; then
@@ -146,74 +162,45 @@ process_url() {
     local CSV_FILE="$2"
     local VERBOSITY="$3"
     local USE_COLOR="$4"
+    local METHOD="$5"
     
-    # Build base curl command
-    local BASE_CURL_OPTS="-sIL -w '%{url_effective}\n%{http_code}\n' -o /dev/null"
-    local CURL_CMD=$(build_curl_command "$BASE_CURL_OPTS" "$URL")
+    # Create a temporary file for headers
+    temp_file=$(mktemp)
     
-    # Execute command and capture output
+    # Single curl command to get all information we need
+    local CURL_OPTS="-sIL -w '%{url_effective}\n%{http_code}\n' -o /dev/null -D $temp_file"
+    local CURL_CMD=$(build_curl_command "$CURL_OPTS" "$URL" "$METHOD")
+    
+    # Execute command once and capture output
     output=$(eval "$CURL_CMD")
     effective_url=$(echo "$output" | head -1)
     final_status=$(echo "$output" | tail -1)
 
-    # For verbose mode, we need to capture all intermediate URLs and status codes
-    if [ "$VERBOSITY" = "verbose" ]; then
-        # Create a temporary file for headers
-        temp_file=$(mktemp)
-        
-        # Use curl with -D to dump headers to file
-        local HEADER_CURL_OPTS="-sIL -o /dev/null -D $temp_file"
-        local HEADER_CURL_CMD=$(build_curl_command "$HEADER_CURL_OPTS" "$URL")
-        eval "$HEADER_CURL_CMD"
-        
-        # Process the headers more carefully to associate each status code with the right URL
-        STATUS_CODES=()
-        REDIRECT_URLS=()
-        REDIRECT_URLS[0]="$URL"  # Start with the original URL
-        
-        current_status=""
-        redirect_count=0
-        
-        while IFS= read -r line || [ -n "$line" ]; do
-            # If line starts with HTTP, it's a status line
-            if [[ "$line" =~ ^HTTP/ ]]; then
-                current_status=$(echo "$line" | awk '{print $2}')
-                STATUS_CODES[$redirect_count]="$current_status"
-            # If line starts with Location, it's a redirect
-            elif [[ "$line" =~ ^[Ll]ocation:\ (.*) ]]; then
-                location="${BASH_REMATCH[1]}"
-                # Remove carriage return if present
-                location=$(echo "$location" | tr -d '\r')
-                redirect_count=$((redirect_count + 1))
-                REDIRECT_URLS[$redirect_count]="$location"
-            fi
-        done < "$temp_file"
-        
-        # Make sure we have the final status code
-        # For non-redirect responses, we might only have one status code
-        if [ ${#STATUS_CODES[@]} -le $redirect_count ]; then
-            # Make one more request to get the final status code
-            local STATUS_CURL_OPTS="-sI -o /dev/null -w '%{http_code}'"
-            local STATUS_CURL_CMD=$(build_curl_command "$STATUS_CURL_OPTS" "$effective_url")
-            final_code=$(eval "$STATUS_CURL_CMD")
-            STATUS_CODES[$redirect_count]="$final_code"
+    # Process the headers to get all status codes and redirect URLs
+    STATUS_CODES=()
+    REDIRECT_URLS=()
+    REDIRECT_URLS[0]="$URL"  # Start with the original URL
+    
+    current_status=""
+    redirect_count=0
+    
+    while IFS= read -r line || [ -n "$line" ]; do
+        # If line starts with HTTP, it's a status line
+        if [[ "$line" =~ ^HTTP/ ]]; then
+            current_status=$(echo "$line" | awk '{print $2}')
+            STATUS_CODES[$redirect_count]="$current_status"
+        # If line starts with Location, it's a redirect
+        elif [[ "$line" =~ ^[Ll]ocation:\ (.*) ]]; then
+            location="${BASH_REMATCH[1]}"
+            # Remove carriage return if present
+            location=$(echo "$location" | tr -d '\r')
+            redirect_count=$((redirect_count + 1))
+            REDIRECT_URLS[$redirect_count]="$location"
         fi
-        
-        rm "$temp_file"
-    else
-        # For normal mode, we just need the status codes
-        local STATUS_CURL_OPTS="-sIL"
-        local STATUS_CURL_CMD=$(build_curl_command "$STATUS_CURL_OPTS" "$URL")
-        status_output=$(eval "$STATUS_CURL_CMD" | grep -i "HTTP/" | awk '{print $2}')
-        
-        # Convert status codes to array
-        STATUS_CODES=()
-        i=0
-        while read -r status; do
-            STATUS_CODES[$i]="$status"
-            i=$((i + 1))
-        done <<< "$status_output"
-    fi
+    done < "$temp_file"
+    
+    # Clean up temporary file
+    rm "$temp_file"
 
     # Format status string with semicolons for both display and CSV
     status_string="["
@@ -248,6 +235,7 @@ process_url() {
         fi
     elif [ "$VERBOSITY" = "verbose" ]; then
         echo -e "Original URL: $URL"
+        echo -e "HTTP Method: $METHOD"
         echo -e "Status codes: $status_string"
         echo "Redirect chain:"
         
@@ -302,6 +290,7 @@ USE_COLOR="true"    # Default to using colors
 AUTH=""             # Authentication credentials
 HEADERS=()          # Array for custom headers
 COOKIES=()          # Array for cookies
+METHOD="$DEFAULT_METHOD"  # Default HTTP method
 
 # Detect if we're on macOS
 IS_MACOS=false
@@ -349,6 +338,15 @@ while [ $# -gt 0 ]; do
             USE_COLOR="false"
             shift
             ;;
+        -m|--method)
+            if [ -z "$2" ]; then
+                echo "Error: HTTP method not specified."
+                echo "Use '$0 --help' for more information."
+                exit 1
+            fi
+            METHOD="$2"
+            shift 2
+            ;;
         -a|--auth)
             if [ -z "$2" ]; then
                 echo "Error: Authentication credentials not specified."
@@ -376,7 +374,7 @@ while [ $# -gt 0 ]; do
             COOKIES+=("$2")
             shift 2
             ;;
-        # Mantendo compatibilidade com as opções antigas
+        # Maintaining compatibility with old options
         -list)
             if [ -z "$2" ] || [ ! -f "$2" ]; then
                 echo "Error: List file not specified or not found."
@@ -415,18 +413,18 @@ if [ -n "$LIST_FILE" ]; then
         url=$(echo "$url" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
         if [ -n "$url" ] && [[ ! "$url" =~ ^[[:space:]]*# ]]; then
             if [ "$VERBOSITY" != "quiet" ]; then
-                process_url "$url" "$CSV_FILE" "$VERBOSITY" "$USE_COLOR"
+                process_url "$url" "$CSV_FILE" "$VERBOSITY" "$USE_COLOR" "$METHOD"
             else
-                process_url "$url" "$CSV_FILE" "$VERBOSITY" "false" > /dev/null
+                process_url "$url" "$CSV_FILE" "$VERBOSITY" "false" "$METHOD" > /dev/null
             fi
         fi
     done < "$LIST_FILE"
 elif [ -n "$SINGLE_URL" ]; then
     # Process a single URL
     if [ "$VERBOSITY" != "quiet" ]; then
-        process_url "$SINGLE_URL" "$CSV_FILE" "$VERBOSITY" "$USE_COLOR"
+        process_url "$SINGLE_URL" "$CSV_FILE" "$VERBOSITY" "$USE_COLOR" "$METHOD"
     else
-        process_url "$SINGLE_URL" "$CSV_FILE" "$VERBOSITY" "false" > /dev/null
+        process_url "$SINGLE_URL" "$CSV_FILE" "$VERBOSITY" "false" "$METHOD" > /dev/null
     fi
 else
     show_help
