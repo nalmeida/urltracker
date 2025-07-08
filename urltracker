@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.3.1"
+VERSION="v2.0.0"
 
 # Colors
 RESET="\033[0m"
@@ -74,7 +74,7 @@ show_help() {
     echo "  -v, --verbose        Verbose mode: show all redirect URLs"
     echo "  -q, --quiet          Quiet mode: no output to console"
     echo "  -nc, --no-color      Disable colored output"
-    echo "  -m, --method <method> HTTP method to use (default: GET)"
+    echo "  -m, --method <method> HTTP method to use (default: GET. HEAD is faster but some servers may block it)"
     echo "  -a, --auth <user:password>   Use HTTP Basic Authentication"
     echo "  -H, --header <header>        Add custom header (can be used multiple times)"
     echo "  -c, --cookie <name=value>    Add a cookie (can be used multiple times)"
