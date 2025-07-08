@@ -97,6 +97,12 @@ urltracker --auth user:pass https://httpbin.org/basic-auth/user/pass
 urltracker --header "User-Agent: Mozilla/5.0" --header "Accept-Language: en-US" https://httpbin.org/status/200
 ```
 
+### Using Custom Method
+
+```bash
+urltracker --method PATCH https://httpbin.org/anything  --verbose
+```
+
 ### Verbose Output
 
 ```bash
@@ -116,6 +122,7 @@ Options:
   -v, --verbose                Verbose mode: show all redirect URLs
   -q, --quiet                  Quiet mode: no output to console
   -nc, --no-color              Disable colored output
+  -m, --method <method> HTTP method to use (default: GET. HEAD is faster but some servers may block it)
   -a, --auth <user:password>   Use HTTP Basic Authentication
   -H, --header <header>        Add custom header (can be used multiple times)
   -c, --cookie <name=value>    Add a cookie (can be used multiple times)
