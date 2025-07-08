@@ -72,6 +72,9 @@ https://httpbin.org/status/404
 <h3>Using Custom Headers</h3>
 <pre><code class="language-bash">urltracker --header &quot;User-Agent: Mozilla/5.0&quot; --header &quot;Accept-Language: en-US&quot; https://httpbin.org/status/200
 </code></pre>
+<h3>Using Custom Method</h3>
+<pre><code class="language-bash">urltracker --method PATCH https://httpbin.org/anything  --verbose
+</code></pre>
 <h3>Verbose Output</h3>
 <pre><code class="language-bash">urltracker https://httpbin.org/redirect/2 --verbose
 </code></pre>
@@ -86,6 +89,7 @@ Options:
   -v, --verbose                Verbose mode: show all redirect URLs
   -q, --quiet                  Quiet mode: no output to console
   -nc, --no-color              Disable colored output
+  -m, --method &lt;method&gt; HTTP method to use (default: GET. HEAD is faster but some servers may block it)
   -a, --auth &lt;user:password&gt;   Use HTTP Basic Authentication
   -H, --header &lt;header&gt;        Add custom header (can be used multiple times)
   -c, --cookie &lt;name=value&gt;    Add a cookie (can be used multiple times)
