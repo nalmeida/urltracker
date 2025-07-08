@@ -266,6 +266,17 @@ execute_with_output() {
   [[ "$output" == *"Original URL"* ]] && echo "✓ Request with custom header completed successfully"
 }
 
+@test "Send custom request method" {
+  echo "TEST: Checking custom request method functionality"
+  
+  # Execute command with output display
+  output=$(execute_with_output "$SCRIPT_PATH --method HEAD \"$TEST_URL/headers\" --verbose")
+  
+  # Validate custom header request completed
+  echo "Validating custom method request:"
+  [[ "$output" == *"Original URL"* ]] && echo "✓ Request with custom header completed successfully"
+}
+
 @test "Send cookies with request" {
   echo "TEST: Checking cookie functionality"
   
