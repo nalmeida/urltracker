@@ -18,10 +18,12 @@ URL Tracker helps you analyze HTTP responses and redirects for single URLs or li
 - CSV output for further analysis
 - Basic authentication support
 - Custom headers and cookies
+- Verbose mode with detailed curl command display for debugging
 
 > Since `v2.0.0` urltracker sends `GET` as default request method as some servers were returning `404` status instead of `200`.
 
-> Since `v1.2.0` urltracker sends a custom header `User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3` instead of original `User-Agent: curl/7.54.1` to better emulate browser behaviour.
+> Since `v2.1.0` urltracker uses `Safari iOS 17.1 User-Agent` for better compatibility with modern web servers and anti-bot protections.
+
 
 ## Requirements
 

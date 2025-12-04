@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v2.0.0"
+VERSION="v2.1.0"
 
 # Colors
 RESET="\033[0m"
@@ -11,7 +11,8 @@ BLUE="\033[0;34m"
 CYAN="\033[0;36m"
 
 # Override default user agent User-Agent: curl/7.54.1
-OVERRIDE_USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+# OVERRIDE_USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+OVERRIDE_USER_AGENT="Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1"
 
 # Override default max timetout for curl requests (2min) to 10s
 OVERRIDE_MAX_TIMEOUT="10"
@@ -169,7 +170,7 @@ process_url() {
     # Single curl command to get all information we need
     local CURL_OPTS="-sIL -w '%{url_effective}\n%{http_code}\n' -o /dev/null -D $temp_file"
     local CURL_CMD=$(build_curl_command "$CURL_OPTS" "$URL" "$METHOD")
-    
+
     # Execute command once and capture output
     output=$(eval "$CURL_CMD")
     effective_url=$(echo "$output" | head -1)
@@ -233,9 +234,12 @@ process_url() {
             echo "$URL $status_string $effective_url"
         fi
     elif [ "$VERBOSITY" = "verbose" ]; then
-        echo -e "Original URL: $URL"
-        echo -e "HTTP Method: $METHOD"
+        echo -e "Original URL: ${CYAN}$URL${RESET}"
+        echo -e "HTTP Method:  ${CYAN}$METHOD${RESET}"
         echo -e "Status codes: $status_string"
+        echo -n "curl command: "
+        # Remove internal options (-w, -o, -D) and temp file to make it copy-pasteable
+        echo -e "${CYAN}$(echo "$CURL_CMD" | sed "s# -w '[^']*'##g" | sed 's# -o /dev/null##g' | sed "s# -D $temp_file##g" | sed 's/  */ /g')${RESET}"
         echo "Redirect chain:"
         
         # Display URLs with their corresponding status codes
