@@ -313,12 +313,29 @@ execute_with_output() {
 
 @test "Combine multiple long options successfully" {
   echo "TEST: Checking combined options functionality"
-  
+
   # Execute command with output display
   output=$(execute_with_output "$SCRIPT_PATH --verbose --no-color --header \"User-Agent: Test\" --cookie \"test=1\" $TEST_URL")
-  
+
   # Validate combined options worked
   echo "Validating combined options:"
   [[ "$output" == *"Original URL"* ]] && echo "✓ Verbose output works with combined options"
   [[ "$output" == *"Status codes"* ]] && echo "✓ Status codes are shown with combined options"
+}
+
+@test "Custom User-Agent header overrides default -A flag (no duplicate)" {
+  echo "TEST: Checking custom User-Agent does not produce duplicate -A flag"
+
+  output=$(execute_with_output "$SCRIPT_PATH --verbose --no-color --header \"User-Agent: bingbot\" \"$TEST_URL\"")
+
+  echo "Validating single User-Agent in curl command:"
+  curl_line=$(echo "$output" | grep "curl command:")
+
+  # Count occurrences of user-agent flags
+  ua_count=$(echo "$curl_line" | grep -oi '\-A \|-\-header User-Agent' | wc -l | tr -d ' ')
+  [ "$ua_count" -eq 1 ] && echo "✓ Only one User-Agent flag present" || { echo "✗ Duplicate User-Agent flags found ($ua_count)"; return 1; }
+
+  # Custom UA must be present, default must not
+  [[ "$curl_line" == *"bingbot"* ]] && echo "✓ Custom User-Agent (bingbot) present" || { echo "✗ Custom User-Agent missing"; return 1; }
+  [[ "$curl_line" != *"Mozilla"* ]] && echo "✓ Default User-Agent not present" || { echo "✗ Default User-Agent still present"; return 1; }
 }

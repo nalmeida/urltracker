@@ -24,6 +24,8 @@ URL Tracker helps you analyze HTTP responses and redirects for single URLs or li
 
 > Since `v2.1.0` urltracker uses `Safari iOS 17.1 User-Agent` for better compatibility with modern web servers and anti-bot protections.
 
+> Since `v2.2.0` passing a `User-Agent` via `--header` properly overrides the default User-Agent instead of sending both.
+
 
 ## Requirements
 
