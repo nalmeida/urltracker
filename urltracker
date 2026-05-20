@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v2.1.0"
+VERSION="v2.2.0"
 
 # Colors
 RESET="\033[0m"
@@ -145,9 +145,20 @@ build_curl_command() {
         cmd="$cmd --max-time $(printf %q "$OVERRIDE_MAX_TIMEOUT")"
     fi
 
-    # Replace original curl User Agent by a browser one
+    # Replace original curl User Agent by a browser one, unless user provided a custom User-Agent header
     if [ -n "$OVERRIDE_USER_AGENT" ]; then
-        cmd="$cmd -A $(printf %q "$OVERRIDE_USER_AGENT")"
+        local has_ua_header=false
+        for header in "${HEADERS[@]}"; do
+            local header_lower
+            header_lower=$(echo "$header" | tr '[:upper:]' '[:lower:]')
+            if [[ "$header_lower" == user-agent:* ]]; then
+                has_ua_header=true
+                break
+            fi
+        done
+        if [ "$has_ua_header" = "false" ]; then
+            cmd="$cmd -A $(printf %q "$OVERRIDE_USER_AGENT")"
+        fi
     fi
     
     # Add URL (using printf %q to properly escape special characters)
